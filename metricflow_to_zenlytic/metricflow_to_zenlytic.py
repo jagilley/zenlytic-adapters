@@ -20,11 +20,12 @@ def main():
         map = {
             "semantic_models.name": "name",
             "semantic_models.description": "description",
-            "semantic_models.model": None,
+            # "semantic_models.model": None,
         }
 
         zenlytic_data = {
             "fields": [],
+            "identifiers": [],
         }
 
         # map yaml to zenlytic
@@ -32,7 +33,9 @@ def main():
             keys = key.split(".")
             for semantic_model in yaml_data[keys[0]]:
                 if keys[1] in semantic_model and value is not None:
-                    zenlytic_data[value] = semantic_model[value]
+                    zenlytic_data[value] = semantic_model[value].strip()
+                else:
+                    zenlytic_data[value] = None
 
         # dimensions to fields
         for dimension in yaml_data["semantic_models"][0]["dimensions"]:
@@ -45,28 +48,40 @@ def main():
                 })
 
         # metrics to measures
-        for metric in yaml_data["metrics"]:
-            if "name" in metric:
-                zenlytic_data["fields"].append({
-                    "name": metric["name"],
-                    "field_type": "measure",
-                    "sql": metric["expr"] if "expr" in metric else None,
-                    # "type": metric["type"], # does not map 1:1
+        if "metrics" in yaml_data:
+            for metric in yaml_data["metrics"]:
+                if "name" in metric:
+                    zenlytic_data["fields"].append({
+                        "name": metric["name"],
+                        "field_type": "measure",
+                        "sql": metric["expr"] if "expr" in metric else None,
+                        # "type": metric["type"], # does not map 1:1
+                    })
+
+        # entities to identifiers
+        for entity in yaml_data["semantic_models"][0]["entities"]:
+            if "name" in entity:
+                zenlytic_data["identifiers"].append({
+                    "name": entity["name"],
+                    "type": entity["type"] if entity["type"] != "unique" else "primary",
+                    # "field_type": "identifier",
+                    # "sql": entity["expr"] if "expr" in entity else None,
+                    # "type": entity["type"], # does not map 1:1
                 })
 
-        print(zenlytic_data)
+        # print(zenlytic_data)
 
         # convert zenlytic data to yaml
         zenlytic_yaml = yaml.dump(zenlytic_data)
 
-        print(zenlytic_yaml)
+        return zenlytic_yaml
     
     # for each directory in project_name/models
     for model in glob(args.project_name + '/models/*/*.yml'):
         if "staging" in model:
             continue
         print(model)
-        convert_yml(model)
+        print(convert_yml(model))
 
 if __name__=="__main__":
     main()
