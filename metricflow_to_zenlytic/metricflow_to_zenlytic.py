@@ -64,8 +64,7 @@ def main():
                 zenlytic_data["identifiers"].append({
                     "name": entity["name"],
                     "type": entity["type"] if entity["type"] != "unique" else "primary",
-                    # "field_type": "identifier",
-                    # "sql": entity["expr"] if "expr" in entity else None,
+                    "sql": entity["expr"] if "expr" in entity else None,
                     # "type": entity["type"], # does not map 1:1
                 })
 
