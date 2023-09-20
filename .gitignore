@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 notes.md
+jaffle-sl-template
 
 # C extensions
 *.so
