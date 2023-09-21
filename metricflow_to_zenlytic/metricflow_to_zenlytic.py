@@ -15,9 +15,6 @@ def main():
             except yaml.YAMLError as exc:
                 print(exc)
 
-        # print(yaml_data)
-        # {'semantic_models': [{'name': 'orders', 'description': 'A model containing order data. The grain of the table is the order id.\n', 
-
         map = {
             "semantic_models.name": "name",
             "semantic_models.description": "description",
@@ -40,29 +37,32 @@ def main():
 
         # dimensions to fields.dimensions
         for dimension in yaml_data["semantic_models"][0]["dimensions"]:
-            if "name" in dimension:
-                field_dict = {
-                    "name": dimension["name"],
-                    "field_type": "dimension",
-                    "sql": dimension["expr"] if "expr" in dimension else None,
-                    # "type": dimension["type"], # does not map 1:1
-                }
-                # handle mf type_params?
-                zenlytic_data["fields"].append(field_dict)
+            field_dict = {
+                "name": dimension["name"],
+                "sql": dimension["expr"] if "expr" in dimension else None,
+            }
+            if dimension['type'] == "time":
+                field_dict["field_type"] = "dimension_group"
+                field_dict["type"] = "time"
+            elif dimension["type"] == "categorical":
+                field_dict["field_type"] = "dimension"
+                field_dict["type"] = "string"
+
+            # handle mf type_params?
+            zenlytic_data["fields"].append(field_dict)
 
         # metrics to measures
         if "metrics" in yaml_data:
             for metric in yaml_data["metrics"]:
-                if "name" in metric:
-                    metric_dict = {
-                        "name": metric["name"],
-                        "field_type": "measure",
-                        "sql": metric["expr"] if "expr" in metric else None,
-                        "type": metric["agg"] if "agg" in metric else None, # not all types map 1:1
-                        "label": metric["label"],
-                    }
+                metric_dict = {
+                    "name": metric["name"],
+                    "field_type": "measure",
+                    "sql": metric["expr"] if "expr" in metric else None,
+                    "type": metric["agg"] if "agg" in metric else None, # not all types map 1:1
+                    "label": metric["label"],
+                }
 
-                    zenlytic_data["fields"].append(metric_dict)
+                zenlytic_data["fields"].append(metric_dict)
 
         # entities to identifiers
         for entity in yaml_data["semantic_models"][0]["entities"]:
@@ -92,7 +92,7 @@ def main():
         if not os.path.exists(views_dir):
             os.makedirs(views_dir)
         # write the yaml to views/model_name.yml
-        with open(views_dir + "/" + os.path.basename(model), "w") as f:
+        with open(views_dir + "/" + (os.path.basename(model).split(".yml")[0] + "_view.yml"), "w") as f:
             f.write(zen_yml)
 
 if __name__=="__main__":
