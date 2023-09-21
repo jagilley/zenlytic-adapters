@@ -1,6 +1,7 @@
 import yaml
 from glob import glob
 import argparse
+import os
 
 def main():
     parser = argparse.ArgumentParser(description='Convert Metricflow to Zenlytic.')
@@ -37,26 +38,31 @@ def main():
                 else:
                     zenlytic_data[value] = None
 
-        # dimensions to fields
+        # dimensions to fields.dimensions
         for dimension in yaml_data["semantic_models"][0]["dimensions"]:
             if "name" in dimension:
-                zenlytic_data["fields"].append({
+                field_dict = {
                     "name": dimension["name"],
                     "field_type": "dimension",
                     "sql": dimension["expr"] if "expr" in dimension else None,
                     # "type": dimension["type"], # does not map 1:1
-                })
+                }
+                # handle mf type_params?
+                zenlytic_data["fields"].append(field_dict)
 
         # metrics to measures
         if "metrics" in yaml_data:
             for metric in yaml_data["metrics"]:
                 if "name" in metric:
-                    zenlytic_data["fields"].append({
+                    metric_dict = {
                         "name": metric["name"],
                         "field_type": "measure",
                         "sql": metric["expr"] if "expr" in metric else None,
-                        # "type": metric["type"], # does not map 1:1
-                    })
+                        "type": metric["agg"] if "agg" in metric else None, # not all types map 1:1
+                        "label": metric["label"],
+                    }
+
+                    zenlytic_data["fields"].append(metric_dict)
 
         # entities to identifiers
         for entity in yaml_data["semantic_models"][0]["entities"]:
@@ -80,7 +86,14 @@ def main():
         if "staging" in model:
             continue
         print(model)
-        print(convert_yml(model))
+        zen_yml = convert_yml(model)
+        # make a directory called views, if it doesn't already exist
+        views_dir = args.project_name + "/views"
+        if not os.path.exists(views_dir):
+            os.makedirs(views_dir)
+        # write the yaml to views/model_name.yml
+        with open(views_dir + "/" + os.path.basename(model), "w") as f:
+            f.write(zen_yml)
 
 if __name__=="__main__":
     main()
