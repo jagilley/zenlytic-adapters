@@ -16,25 +16,15 @@ def main():
             except yaml.YAMLError as exc:
                 print(exc)
 
-        map = {
-            "semantic_models.name": "name",
-            "semantic_models.description": "description",
-            # "semantic_models.model": None,
-        }
-
         zenlytic_data = {
             "fields": [],
             "identifiers": [],
         }
 
-        # map yaml to zenlytic
-        for key, value in map.items():
-            keys = key.split(".")
-            for semantic_model in yaml_data[keys[0]]:
-                if keys[1] in semantic_model and value is not None:
-                    zenlytic_data[value] = semantic_model[value].strip()
-                else:
-                    zenlytic_data[value] = None
+        # get view-level values
+        zenlytic_data['name'] = yaml_data['semantic_models'][0]['name']
+        zenlytic_data['description'] = yaml_data['semantic_models'][0]['description']
+        zenlytic_data['default_date'] = yaml_data['semantic_models'][0]['defaults']['agg_time_dimension']
 
         # handle model -> model_name
         def extract_inner_text(s):
@@ -71,6 +61,10 @@ def main():
                     "type": metric["agg"] if "agg" in metric else None, # not all types map 1:1
                     "label": metric["label"],
                 }
+                if "agg_time_dimension" in metric:
+                    metric_dict["canon_time"] = metric["agg_time_dimension"]
+                if "meta" in metric:
+                    metric_dict["extra"] = metric["meta"]
 
                 zenlytic_data["fields"].append(metric_dict)
 
