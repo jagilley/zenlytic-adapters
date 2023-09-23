@@ -2,6 +2,7 @@ import yaml
 from glob import glob
 import argparse
 import os
+import re
 
 def main():
     parser = argparse.ArgumentParser(description='Convert Metricflow to Zenlytic.')
@@ -34,6 +35,15 @@ def main():
                     zenlytic_data[value] = semantic_model[value].strip()
                 else:
                     zenlytic_data[value] = None
+
+        # handle model -> model_name
+        def extract_inner_text(s):
+            match = re.search(r"ref\('(.*)'\)", s)
+            if match:
+                return match.group(1)
+            return None
+
+        zenlytic_data["model_name"] = extract_inner_text(yaml_data["semantic_models"][0]["model"])
 
         # dimensions to fields.dimensions
         for dimension in yaml_data["semantic_models"][0]["dimensions"]:
