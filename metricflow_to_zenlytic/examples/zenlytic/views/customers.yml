@@ -1,0 +1,17 @@
+default_date: first_ordered_at
+description: "Customer dimension table. The grain of the table is one row per\n  customer.\n"
+fields:
+- field_type: dimension
+  name: is_new_customer
+  sql: case when first_ordered_at is not null then true else false end
+  type: string
+- field_type: dimension_group
+  name: first_ordered_at
+  sql: null
+  type: time
+identifiers:
+- name: customer
+  sql: customer_id
+  type: primary
+model_name: customers
+name: customers

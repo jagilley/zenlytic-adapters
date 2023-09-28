@@ -4,10 +4,6 @@ import argparse
 import os
 import re
 
-parser = argparse.ArgumentParser(description='Convert Metricflow to Zenlytic.')
-parser.add_argument('project_name', type=str, help='The name of the Metricflow project.')
-args = parser.parse_args()
-
 def convert_mf_yml_to_dict(yml_path):
     with open(yml_path, 'r') as stream:
         try:
@@ -85,18 +81,27 @@ def mf_dict_to_zen_views(yaml_data):
     
     return zen_fields
 
-def zen_views_to_yaml(zenlytic_data):
-    views_dir = args.project_name + "/views"
-    if not os.path.exists(views_dir):
+def zen_views_to_yaml(zenlytic_data, project_name, write_to_file=True):
+    views_dir = project_name + "/views"
+    if not os.path.exists(views_dir) and write_to_file:
         os.makedirs(views_dir)
+
+    views_yaml = []
     for zen_view in zenlytic_data:
         # write the yaml to views/model_name.yml
-        with open(views_dir + "/" + zen_view["name"] + ".yml", 'w') as outfile:
-            yaml.dump(zen_view, outfile, default_flow_style=False)
+        if write_to_file:
+            with open(views_dir + "/" + zen_view["name"] + ".yml", 'w') as outfile:
+                yaml.dump(zen_view, outfile, default_flow_style=False)
 
-def main():
+        # add the yaml string to views_yaml
+        views_yaml.append(yaml.dump(zen_view, default_flow_style=False))
+
+    return views_yaml
+
+
+def main(project_name):
     # for each directory in project_name/models
-    for model in glob(args.project_name + '/models/*/*.yml'):
+    for model in glob(project_name + '/models/*/*.yml'):
         if "staging" in model:
             continue
         print(model)
@@ -105,7 +110,10 @@ def main():
         # convert the dictionary to zenlytic views
         zen_views = mf_dict_to_zen_views(mf_yml)
         # convert the zenlytic views to yaml
-        zen_views_to_yaml(zen_views)
+        zen_views_to_yaml(zen_views, project_name)
 
 if __name__=="__main__":
-    main()
+    parser = argparse.ArgumentParser(description='Convert Metricflow to Zenlytic.')
+    parser.add_argument('project_name', type=str, help='The name of the Metricflow project.')
+    args = parser.parse_args()
+    main(args.project_name)
