@@ -19,7 +19,8 @@ def test_main():
 
     # assert that zen_yml equals one of the views
     print(zen_yml)
-    print(views)
+    print("---")
+    print(views[0])
     assert zen_yml in views
 
 if __name__=="__main__":
