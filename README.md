@@ -10,3 +10,6 @@ Utilities for converting semantic layer YAML files to Zenlytic's format.
 1. `cd` back into the dbt project
 1. Run `mf_to_zen --project_name .`
 1. You should now see a `views` directory in your dbt project containing your Metricflow semantic models represented as Zenlytic views.
+
+## To test
+`pytest`

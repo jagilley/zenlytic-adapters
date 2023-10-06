@@ -1,0 +1,70 @@
+default_date: ordered_at
+description: 'Items contatined in each order. The grain of the table is one row per
+  order item.
+
+  '
+fields:
+- field_type: dimension_group
+  name: ordered_at
+  sql: ordered_at
+  type: time
+- field_type: dimension
+  name: is_food_item
+  sql: null
+  type: string
+- field_type: dimension
+  name: is_drink_item
+  sql: null
+  type: string
+- field_type: measure
+  label: Revenue
+  name: revenue
+  sql: null
+  type: null
+- field_type: measure
+  label: Order Cost
+  name: order_cost
+  sql: null
+  type: null
+- field_type: measure
+  label: Median Revenue
+  name: median_revenue
+  sql: null
+  type: null
+- field_type: measure
+  label: Food Revenue
+  name: food_revenue
+  sql: null
+  type: null
+- field_type: measure
+  label: Food Revenue %
+  name: food_revenue_pct
+  sql: null
+  type: null
+- field_type: measure
+  label: Revenue Growth % M/M
+  name: revenue_growth_mom
+  sql: null
+  type: null
+- field_type: measure
+  label: Order Gross Profit
+  name: order_gross_profit
+  sql: null
+  type: null
+- field_type: measure
+  label: Cumulative Revenue (All Time)
+  name: cumulative_revenue
+  sql: null
+  type: null
+identifiers:
+- name: order_item
+  sql: order_item_id
+  type: primary
+- name: order_id
+  sql: order_id
+  type: foreign
+- name: product
+  sql: product_id
+  type: foreign
+model_name: order_items
+name: order_item

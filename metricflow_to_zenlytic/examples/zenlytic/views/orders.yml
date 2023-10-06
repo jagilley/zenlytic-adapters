@@ -1,0 +1,54 @@
+default_date: ordered_at
+description: 'Order fact table. This table is at the order grain with one row per
+  order.
+
+  '
+fields:
+- field_type: dimension_group
+  name: ordered_at
+  sql: ordered_at
+  type: time
+- field_type: dimension
+  name: order_total_dim
+  sql: order_total
+  type: string
+- field_type: dimension
+  name: is_food_order
+  sql: null
+  type: string
+- field_type: dimension
+  name: is_drink_order
+  sql: null
+  type: string
+- field_type: measure
+  label: Order Total
+  name: order_total
+  sql: null
+  type: null
+- field_type: measure
+  label: Large Orders
+  name: large_order
+  sql: null
+  type: null
+- field_type: measure
+  label: Orders
+  name: orders
+  sql: null
+  type: null
+- field_type: measure
+  label: Food Orders
+  name: food_orders
+  sql: null
+  type: null
+identifiers:
+- name: order_id
+  sql: null
+  type: primary
+- name: location
+  sql: location_id
+  type: foreign
+- name: customer
+  sql: customer_id
+  type: foreign
+model_name: orders
+name: orders
